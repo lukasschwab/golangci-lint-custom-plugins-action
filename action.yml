@@ -1,0 +1,82 @@
+name: golangci-lint
+description: Run golangci-lint in your Go project.
+
+inputs:
+  version:
+    description: >
+      The golangci-lint version to use.
+      Default: latest
+    default: 'latest'
+    required: false
+  custom-gcl-config:
+    description: >
+      The custom golangci-lint configuration to use.
+      Default: .custom-gcl.yml.
+    default: '.custom-gcl.yml'
+  # https://github.com/golangci/golangci-lint/issues/5369
+  custom-gcl-binary:
+    description: >
+      The custom golangci-lint binary to use after build; must match name and 
+      destination fields in your custom golangci-lint configuration.
+      Default: ./custom-gcl
+    default: './custom-gcl'
+    required: false
+  working-directory:
+    description: >
+      Where to run the custom golangci-lint binary.
+      Default: [repository root]
+    default: ""
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Restore custom-gcl linter
+      id: cache-linter-restore
+      uses: actions/cache/restore@v4
+      with:
+          path: ${{ inputs.custom-gcl-binary }}
+          key: ${{ runner.os }}-custom-gcl-${{ inputs.version }}-${{ hashFiles( inputs.custom-gcl-config ) }}
+
+    - name: Build custom-gcl linter
+      if: steps.cache-linter-restore.outputs.cache-hit != 'true'
+      run: |
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@${{ inputs.version }}
+        golangci-lint custom -v
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Save custom-gcl linter
+      if: steps.cache-linter-restore.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ inputs.custom-gcl-binary }}
+        key: ${{ steps.cache-linter-restore.outputs.cache-primary-key }}
+
+    # These cache keys and fallbacks attempt to aggressively restore some cache.
+    # They may be overfit to running this action for pull requests, and may miss
+    # a cache for the prior commit even when its available (e.g. run on main).
+    - name: Restore custom-gcl linter cache
+      id: cache-golangci-lint-cache-restore
+      uses: actions/cache/restore@v4
+      with:
+          path: ~/.cache/golangci-lint
+          key: ${{ runner.os }}-custom-gcl-cache-${{ inputs.version }}-${{ github.head_ref }}-${{ github.sha }}
+          restore-keys: |
+            # Any prior commit on this branch.
+            ${{ runner.os }}-custom-gcl-cache-${{ inputs.version }}-${{ github.head_ref }}-
+            # For PRs, the merge-base commit.
+            ${{ runner.os }}-custom-gcl-cache-${{ inputs.version }}-${{ github.base_ref }}-${{ github.event.pull_request.base.sha }}
+            # For PRs, any commit on the base branch.
+            ${{ runner.os }}-custom-gcl-cache-${{ inputs.version }}-${{ github.base_ref }}-
+
+    - name: Run custom-gcl linter
+      run: ${{ inputs.custom-gcl-binary }} run ./...
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Save custom-gcl linter cache
+      uses: actions/cache/save@v4
+      with:
+        path: ~/.cache/golangci-lint
+        key: ${{ steps.cache-golangci-lint-cache-restore.outputs.cache-primary-key }}
