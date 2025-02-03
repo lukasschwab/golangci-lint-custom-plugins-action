@@ -64,12 +64,12 @@ runs:
       with:
           path: ~/.cache/golangci-lint
           key: ${{ runner.os }}-custom-gcl-cache-${{ inputs.version }}-${{ github.head_ref }}-${{ github.sha }}
+          # Any prior commit on this branch.
+          # For PRs, the merge-base commit.
+          # For PRs, any commit on the base branch.
           restore-keys: |
-            # Any prior commit on this branch.
             ${{ runner.os }}-custom-gcl-cache-${{ inputs.version }}-${{ github.head_ref }}-
-            # For PRs, the merge-base commit.
             ${{ runner.os }}-custom-gcl-cache-${{ inputs.version }}-${{ github.base_ref }}-${{ github.event.pull_request.base.sha }}
-            # For PRs, any commit on the base branch.
             ${{ runner.os }}-custom-gcl-cache-${{ inputs.version }}-${{ github.base_ref }}-
 
     - name: Run custom-gcl linter
