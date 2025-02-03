@@ -28,6 +28,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
       - name: Lint
         uses: lukasschwab/golangci-lint-custom-plugins-action@v0.0.1
 
