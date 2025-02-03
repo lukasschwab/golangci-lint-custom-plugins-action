@@ -15,7 +15,7 @@ For simplest usage with the action defaults:
 <details><summary>Example GitHub Workflow definition...</summary>
 
 ```yaml
-name: golangci-lint
+name: Go
 
 on:
   push:
@@ -28,8 +28,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: golangci-lint-custom
-        uses: lukasschwab/golangci-lint-custom-plugins-action@v0.0.0
+      - name: Lint
+        uses: lukasschwab/golangci-lint-custom-plugins-action@v0.0.1
 
 ```
 
