@@ -11,3 +11,26 @@ For simplest usage with the action defaults:
 
 1. Define your custom `golangci-lint` configuration as `.custom-gcl.yml` in your repository root.
 2. *Do not* specify a `name`/`location` in `.custom-gcl.yml`.
+
+<details><summary>Example GitHub Workflow definition...</summary>
+
+```yaml
+name: golangci-lint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  golangci-lint-custom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: golangci-lint-custom
+        uses: lukasschwab/golangci-lint-custom-plugins-action@v0.0.0
+
+```
+
+</details>
