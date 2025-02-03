@@ -1,5 +1,7 @@
-name: golangci-lint
-description: Run golangci-lint in your Go project.
+name: golangci-lint-custom
+description: >
+  Run golangci-lint in your Go project.
+  Unofficial alternative to golangci-lint-action for use with custom module plugins.
 
 inputs:
   version:
